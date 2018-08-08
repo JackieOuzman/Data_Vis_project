@@ -1,5 +1,5 @@
 ---
-title: "Writup"
+title: "Write up"
 author: "Jackie"
 date: "7 August 2018"
 output: html_document
@@ -19,12 +19,24 @@ When you click the **Knit** button a document will be generated that includes bo
 summary(cars)
 ```
 
-## Including Plots
+## Setting up my working environmnets.
+In my DATASCHOOL working directory, I created a new folders to organise my work.
+I have a folder for my raw data, scripts and figures.
+Using the drop down in R studio I have also created files, which I will do my work:
+These files are:
+1. Create a new project in R studio
+2. Create a new script file in R
+3. Create a new markdown file
 
-You can also embed plots, for example:
+The advantage of creating a new project in R studio is that I am prompted to create a git repository
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+##Creating a GIT repository.
+
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+maturity_data <- read_csv("Raw_data/Taylors_maturity_2015_2016.csv")
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
