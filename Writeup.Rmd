@@ -15,9 +15,6 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r cars}
-summary(cars)
-```
 
 ## Setting up my working environmnets.
 In my DATASCHOOL working directory, I created a new folders to organise my work.
@@ -31,6 +28,31 @@ These files are:
 The advantage of creating a new project in R studio is that I am prompted to create a git repository
 
 ##Creating a GIT repository.
+When I select create a new project in R studio, I go onto create a new directory and new project, here is a small checkbox 'create git repository'.
+Once this is selcted I can go to R studio Termial to double check that I have respository.
+
+```{r}
+## Question can I add code in markdown that relates to terminal?
+#> git status (this gives an error)
+#$ git status (this gives an error)
+```
+## Next step is to go to GitHub
+log in, and create a new repostitory.
+I selecetd public 
+Simply follow the instructions 
+'....or push on existing repository from command line'
+copy the code and paste in R studio terminal - done!
+
+This part is setting up a repsoitory on Github which allows my work to be pushed from my local computer to Github - Safe and sound!
+
+##Staging, commiting and pushing in R studio
+Again R studio makes things easy for me!
+Git pane has a list of my files
+Checkbox allows me to stage the files and then commit.
+Adding a comment on the commit window.
+
+At the end of the day I can push my files to Github using the push icon in the git window.
+
 
 
 ```{r}
