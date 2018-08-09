@@ -1,0 +1,582 @@
+---
+title: "Taylors maturity sampling data visulisation"
+output: word_document
+
+ 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+
+#*Add in table of contents when I work out how*
+
+* Set up Git
+
+* import data and make tidy
+
+* display data 
+
+
+# Setting up working environmnets.
+##Working directory and folders
+In my DATASCHOOL working directory, I created a new folders to organise my work.
+
+I have a folder for my raw data, scripts and figures.
+
+Using the drop down in R studio I have also created files, in which I will do my work.
+
+These files are:
+
+* Create a new project in R studio
+
+* Create a new script file in R
+
+* Create a new markdown file
+
+
+
+The advantage of creating a new project in R studio is that I am prompted to create a git repository
+
+##Creating a GIT repository.
+When I select create a new project in R studio, I go onto create a new directory and new project, here is a small checkbox 'create git repository'.
+Once this is selcted I can go to R studio Termial to double check that I have respository.
+
+
+In the terminal 
+$git status
+## Next step is to go to GitHub
+log in, and create a new repostitory.
+
+I selecetd public 
+
+Simply follow the instructions 
+
+'....or push on existing repository from command line'
+
+copy the code and paste in R studio terminal - done!
+
+This part is setting up a repsoitory on Github which allows my work to be pushed from my local computer to Github - Safe and sound!
+
+##Staging, commiting and pushing in R studio
+Again R studio makes things easy for me!
+
+Git pane has a list of my files.
+
+Checkbox allows me to stage the files and then commit.
+
+Adding a comment on the commit window.
+
+At the end of the day I can push my files to Github using the push icon in the git window.
+
+#Importing data.
+
+* Import tidyverse and ggplot2
+(note tidyverse already had ggplot2)
+
+* Import dplyer
+
+* Import my data using read_csv
+
+```{r import tidyverse}
+library(tidyverse)
+library(dplyr)
+
+maturity_data <- read_csv("Raw_data/Taylors_maturity_2015_2016.csv")
+```
+#Check out what my data looks like
+I have a few options here;
+
+*head()
+
+*str()
+
+*View(maturity_data) 
+
+*glimps
+```{r look at data}
+#str(maturity_data)
+#head(maturity_data)
+#View(maturity_data)
+glimpse(maturity_data)
+```
+#Make my data tidy.
+I have a number of problem with my data that needs to be fixed:
+
+1. I have coloumn that need to be removed that have NA
+
+2. I have coloumn headings with white spaces
+
+3. I don't have a unquie ID coloumn
+
+4. My date coloumn is not represented at a date rather a string.
+  I should consider splitting this coloumn out to day, month, year
+
+Consider creating a new data coloumn that has year as factor.
+
+##1.Select data I want to use / remove the data I don't want.
+
+```{r delete the columns I dont want to use}
+
+mat_tidy1 <- select(maturity_data,c(1:18))
+glimpse(mat_tidy1)
+```
+Note I played around with a number of other option.
+I was not convinced it worked 
+It looked like this worked when you run head but when you run str you get the orginal list.
+
+```{r select the data I want}
+#test1_1 <- select(maturity, -starts_with("X"))
+#head(test1_1)
+
+```
+
+#2.Remove the white spaces in heading names.
+This can be done one at a time using this function.
+
+names(maturity_data_clean)[names(maturity_data_clean) == 'sampling event'] <- 'sampling_event'
+
+But much better way is to use this function.
+```{r removing the white spaces from the heading}
+names(mat_tidy1) <-str_replace_all(names(mat_tidy1), c(" " = "_", "/" = "_" ))
+glimpse(mat_tidy1)
+```
+**Help I would like to make a new df with the new headings but I cant get this to work for me**
+
+
+
+
+#3.Create a unquie ID.
+**3a create a new data coloum for year as float**
+```{r create a new data clm for year as float}
+mat_tidy1 <- mat_tidy1 %>%
+  mutate(Year_a = Year)
+
+mat_tidy1$Year_a <- as.factor(mat_tidy1$Year_a)
+glimpse(mat_tidy1)
+```
+
+**3b create a new data coloum that combines Year and GPS_sampling__pt_ID**
+```{r new data coloum with unquie ID}
+mat_tidy3 <- mat_tidy1 %>%
+  unite(ID, Year, GPS_sampling__pt_ID)
+
+glimpse(mat_tidy3)
+```
+#4. My date coloumn is not represented at a date rather a string.
+I should consider splitting this coloumn out to day, month, year.
+
+```{r split out date clm}
+mat_tidy4 <- mat_tidy3 %>%
+  separate(Sampling_date, c("Day", "Month", "Year"), sep = '/')
+mat_tidy4
+
+head(mat_tidy4)
+```
+These columns are char I want them to be intergers
+```{r make day month year as interger}
+mat_tidy4$Day <- as.integer(mat_tidy4$Day)
+mat_tidy4$Month <- as.integer(mat_tidy4$Month)
+mat_tidy4$Year <- as.integer(mat_tidy4$Year)
+glimpse(mat_tidy4)
+```
+
+##Plotting data
+Make an empty plot
+```{r make an empty plot before adding data}
+ggplot(data=mat_tidy4, aes(x = sampling_event, y = brix))
+```
+Now fill my plot
+
+```{r fill plot with sampling event vs brix}
+ggplot(data=mat_tidy4, aes(x = sampling_event, y = brix, colour = Year_a))+
+  geom_point(alpha = 0.3)
+```
+Each year had a number of sampling events which occured through the season.
+In 2015 we sampled 30 vines on 7 seperate events
+In 2016 we sampled 30 vines on 8 seperate events
+Plotting by event makes the data points sit onto of each other.
+Plotting by date (on the x axis) will mean that there is a big gap between years.
+I have calulated the growing degree days for each year, based on weather data, this could be a way of displaying the x axis.
+
+```{r fill plot with GFV vs brix}
+ggplot(data=mat_tidy4, aes(x = GFV, y = brix, colour = Year_a))+
+  geom_point(alpha = 0.3) +
+  labs(x = "Degree days",y = "Brix",title = ("maturity of grapes"),colour = "Year") +
+    theme(axis.text.x=element_text(), axis.ticks.x = element_blank())
+```
+
+Formatting...
+
+```{r same as above with formatting}
+ggplot(data=mat_tidy4, aes(x = GFV, y = brix, colour = Year_a))+
+  geom_point(alpha = 0.3) +
+  labs(x = "Degree days",y = "Brix",title = ("maturity of grapes"),colour = "Year") +
+  theme(panel.grid = element_blank(),
+        axis.text.x=element_text(), 
+        axis.ticks.x = element_blank(),
+        panel.background = element_rect(fill = "white",
+                                        colour = "black"))
+```
+Try all the grape properties...
+
+```{r plot all the grape properties}
+
+#X = GFV and Y = pH
+ggplot(data=mat_tidy4, aes(x = GFV, y = pH, colour = Year_a))+
+  geom_point(alpha = 0.3) +
+  labs(x = "Degree days",y = "pH",title = ("maturity of grapes"),colour = "Year") +
+  theme(panel.grid = element_blank(),
+        axis.text.x=element_text(), 
+        axis.ticks.x = element_blank(),
+        panel.background = element_rect(fill = "white",
+                                        colour = "black"))
+        
+#X = GFV and Y = TA
+ggplot(data=mat_tidy4, aes(x = GFV, y = TA, colour = Year_a))+
+  geom_point(alpha = 0.3) +
+  labs(x = "Degree days",y = "TA",title = ("maturity of grapes"),colour = "Year") +
+  theme(panel.grid = element_blank(),
+        axis.text.x=element_text(), 
+        axis.ticks.x = element_blank(),
+        panel.background = element_rect(fill = "white",
+                                        colour = "black"))
+
+#X = GFV and Y = bunch_wt
+ggplot(data=mat_tidy4, aes(x = GFV, y = bunch_wt, colour = Year_a))+
+  geom_point(alpha = 0.3) +
+  labs(x = "Degree days",y = "Bunch weight",title = ("maturity of grapes"),colour = "Year") +
+  theme(panel.grid = element_blank(),
+        axis.text.x=element_text(), 
+        axis.ticks.x = element_blank(),
+        panel.background = element_rect(fill = "white",
+                                        colour = "black"))
+#X = GFV and Y = Mean_berry_wt
+ggplot(data=mat_tidy4, aes(x = GFV, y = Mean_berry_wt, colour = Year_a))+
+  geom_point(alpha = 0.3) +
+  labs(x = "Degree days",y = "Mean berry weight",title = ("maturity of grapes"),colour = "Year") +
+  theme(panel.grid = element_blank(),
+        axis.text.x=element_text(), 
+        axis.ticks.x = element_blank(),
+        panel.background = element_rect(fill = "white",
+                                        colour = "black"))
+#X = GFV and Y = Colour_per_berry_Wt
+ggplot(data=mat_tidy4, aes(x = GFV, y = Colour_per_berry_Wt, colour = Year_a))+
+  geom_point(alpha = 0.3) +
+  labs(x = "Degree days",y = "Colour per berry weight",title = ("maturity of grapes"),colour = "Year") +
+  theme(panel.grid = element_blank(),
+        axis.text.x=element_text(), 
+        axis.ticks.x = element_blank(),
+        panel.background = element_rect(fill = "white",
+                                        colour = "black"))
+
+#X = GFV and Y = Phenolic_per_berry_Wt
+ggplot(data=mat_tidy4, aes(x = GFV, y = Phenolic_per_berry_Wt, colour = Year_a))+
+  geom_point(alpha = 0.3) +
+  labs(x = "Degree days",y = "Phenolic per berry weight",title = ("maturity of grapes"),colour = "Year") +
+  theme(panel.grid = element_blank(),
+        axis.text.x=element_text(), 
+        axis.ticks.x = element_blank(),
+        panel.background = element_rect(fill = "white",
+                                        colour = "black"))
+
+```
+
+#Grape properties change through the season.
+
+For grape properties such as brix, pH, TA and colour variation over the season seems to be stronger than variation of the 30 vines sampled.
+
+For the other properties the plots show a huge variation per sampling location, which seems to dominate how the property changes over time.
+
+Can I check this with the grape property Brix?
+
+##Plot brix for each sample point.
+```{r plot by sample location}
+ggplot(data=mat_tidy4, aes(x = Sample, y = brix, colour = Year_a))+
+  geom_point(alpha = 0.5) + facet_wrap(~ sampling_event)+
+labs(x = "sample location",y = "Brix",title = ("maturity of grapes"),colour = "Year") +
+  theme(panel.grid = element_blank(),
+        axis.text.x=element_text(), 
+        axis.ticks.x = element_blank(),
+        panel.background = element_rect(fill = "white",
+                                        colour = "black"))
+
+```
+This is saying the early in the season differences between location and year is not as obvious as late in the year.
+This is quite a broad generalisation.
+
+Need to overlay with something else?
+Should look at how these sample location were picked.
+Something to add to my data set!
+
+
+Perhaps I can see more if I look at what is happening per year?
+
+```{r}
+mat_tidy4 %>%
+    filter(Year_a == "2015") %>%
+  ggplot(aes(x = POINT_X, y = POINT_Y, colour = brix)) +
+  geom_point(size = 2.5) +
+  facet_wrap(~ GFV) + 
+  labs(                                      
+    x = "Easting",
+    y = "Northing",
+    title = "2015",
+    colour = "Brix") +
+  theme(panel.grid = element_blank(), #remove panel lines
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        panel.background = element_rect(fill = "white",
+                                        colour = "black"))
+```
+
+2016
+
+
+```{r}
+mat_tidy4 %>%
+  filter(Year_a == "2016") %>%
+  ggplot(aes(x = POINT_X, y = POINT_Y, colour = brix)) +
+  geom_point(size = 2.5) +
+  facet_wrap(~ GFV) + 
+  labs(                                      
+    x = "Easting",
+    y = "Northing",
+    title = "2016",
+    colour = "Brix") +
+  theme(panel.grid = element_blank(), #remove panel lines
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        panel.background = element_rect(fill = "white",
+                                        colour = "black"))
+```
+
+What I really want to see is each pane with its own scale, its hard to remove the effect of time on these graphs.
+
+Harvest sampling is pretty important.
+```{r brix at harvest by location 2015}
+mat_tidy4 %>%
+  filter(GFV == "3277") %>%
+  ggplot(aes(x = POINT_X, y = POINT_Y, colour = brix)) +
+  geom_point(size = 2.5) +
+  labs(                                      
+    x = "Easting",
+    y = "Northing",
+    title = "Harvest 2015",
+    colour = "brix") +
+  theme(panel.grid = element_blank(), #remove panel lines
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        panel.background = element_rect(fill = "white",
+                                        colour = "black"))
+```
+
+```{r brix at harvest by location 2016}
+mat_tidy4 %>%
+  filter(GFV == "3499") %>%
+  ggplot(aes(x = POINT_X, y = POINT_Y, colour = brix)) +
+  geom_point(size = 2.5) +
+  labs(                                      
+    x = "Easting",
+    y = "Northing",
+    title = "Harvest 2016",
+    colour = "brix") +
+  theme(panel.grid = element_blank(), #remove panel lines
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        panel.background = element_rect(fill = "white",
+                                        colour = "black"))
+
+```
+
+What about some other grape property that is more variable through time?
+```{r Bunch weight for 2015}
+mat_tidy4 %>%
+  filter(Year_a == "2015") %>%
+  ggplot(aes(x = POINT_X, y = POINT_Y, colour = bunch_wt)) +
+  geom_point(size = 2.5) +
+  facet_wrap(~ GFV) + 
+  labs(                                      
+    x = "Easting",
+    y = "Northing",
+    title = "2015",
+    colour = "Bunch weight") +
+  theme(panel.grid = element_blank(), #remove panel lines
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        panel.background = element_rect(fill = "white",
+                                        colour = "black"))
+
+```
+```
+```{r Bunch weight for 2016}
+mat_tidy4 %>%
+  filter(Year_a == "2016") %>%
+  ggplot(aes(x = POINT_X, y = POINT_Y, colour = bunch_wt)) +
+  geom_point(size = 2.5) +
+  facet_wrap(~ GFV) + 
+  labs(                                      
+    x = "Easting",
+    y = "Northing",
+    title = "2016",
+    colour = "Bunch weight") +
+  theme(panel.grid = element_blank(), #remove panel lines
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        panel.background = element_rect(fill = "white",
+                                        colour = "black"))
+```
+
+#I think I can see Jesus!
+
+##Plotting grape variable agaist each other.
+```{r Brix vs all most}
+
+#Brix vs pH
+mat_tidy4 %>%
+  ggplot(aes(x = brix, y = pH, colour = GFV, shape = Year_a)) +
+  geom_point(size = 2.5, alpha =0.8) +
+  labs(                                      
+    x = "Brix",
+    y = "pH",
+    title = "",
+    colour = "Degree days", 
+    shape = "Year") +
+  theme(panel.grid = element_blank(), #remove panel lines
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        panel.background = element_rect(fill = "white",
+                                        colour = "black"))
+#Brix vs TA
+mat_tidy4 %>%
+  ggplot(aes(x = brix, y = TA, colour = GFV, shape = Year_a)) +
+  geom_point(size = 2.0, alpha =0.8) +
+  labs(                                      
+    x = "Brix",
+    y = "TA",
+    title = "",
+    colour = "Degree days", 
+    shape = "Year") +
+  theme(panel.grid = element_blank(), #remove panel lines
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        panel.background = element_rect(fill = "white",
+                                        colour = "black"))
+glimpse(mat_tidy4)
+
+#Brix vs bunch_wt
+mat_tidy4 %>%
+  ggplot(aes(x = brix, y = bunch_wt, colour = GFV, shape = Year_a)) +
+  geom_point(size = 2.0, alpha =0.8) +
+  labs(                                      
+    x = "Brix",
+    y = "Bunch weight",
+    title = "",
+    colour = "Degree days", 
+    shape = "Year") +
+  theme(panel.grid = element_blank(), #remove panel lines
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        panel.background = element_rect(fill = "white",
+                                        colour = "black"))
+#Brix vs Mean_berry_wt
+mat_tidy4 %>%
+  ggplot(aes(x = brix, y = Mean_berry_wt, colour = GFV, shape = Year_a)) +
+  geom_point(size = 2.0, alpha =0.8) +
+  labs(                                      
+    x = "Brix",
+    y = "Mean berry weight",
+    title = "",
+    colour = "Degree days", 
+    shape = "Year") +
+  theme(panel.grid = element_blank(), #remove panel lines
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        panel.background = element_rect(fill = "white",
+                                        colour = "black"))
+#Brix vs Colour_per_berry_Wt
+mat_tidy4 %>%
+  ggplot(aes(x = brix, y = Colour_per_berry_Wt, colour = GFV, shape = Year_a)) +
+  geom_point(size = 2.0, alpha =0.8) +
+  labs(                                      
+    x = "Brix",
+    y = "Colour per berry weight",
+    title = "",
+    colour = "Degree days", 
+    shape = "Year") +
+  theme(panel.grid = element_blank(), #remove panel lines
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        panel.background = element_rect(fill = "white",
+                                        colour = "black"))
+#Phenolic_per_berry_Wt
+mat_tidy4 %>%
+  ggplot(aes(x = brix, y = Phenolic_per_berry_Wt, colour = GFV, shape = Year_a)) +
+  geom_point(size = 2.0, alpha =0.8) +
+  labs(                                      
+    x = "Brix",
+    y = "Phenolic per berry weight",
+    title = "",
+    colour = "Degree days", 
+    shape = "Year") +
+  theme(panel.grid = element_blank(), #remove panel lines
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        panel.background = element_rect(fill = "white",
+                                        colour = "black"))
+```
+
+Do pH and TA have relationship?
+
+```{r}
+#pH vs TA
+mat_tidy4 %>%
+  ggplot(aes(x = pH, y = TA, colour = GFV, shape = Year_a)) +
+  geom_point(size = 2.0, alpha =0.8) +
+  labs(                                      
+    x = "pH",
+    y = "TA",
+    title = "",
+    colour = "Degree days", 
+    shape = "Year") +
+  theme(panel.grid = element_blank(), #remove panel lines
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        panel.background = element_rect(fill = "white",
+                                        colour = "black"))
+
+
+#pH vs colour
+mat_tidy4 %>%
+  ggplot(aes(x = pH, y = Colour_per_berry_Wt, colour = GFV, shape = Year_a)) +
+  geom_point(size = 2.0, alpha =0.8) +
+  labs(                                      
+    x = "pH",
+    y = "Colour per berry Wt",
+    title = "",
+    colour = "Degree days", 
+    shape = "Year") +
+  theme(panel.grid = element_blank(), #remove panel lines
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        panel.background = element_rect(fill = "white",
+                                        colour = "black"))
+#phenolics vs colour
+mat_tidy4 %>%
+  ggplot(aes(x = Phenolic_per_berry_Wt, y = Colour_per_berry_Wt, colour = GFV, shape = Year_a)) +
+  geom_point(size = 2.0, alpha =0.8) +
+  labs(                                      
+    x = "Phenolic per berry Wt",
+    y = "Colour per berry Wt",
+    title = "",
+    colour = "Degree days", 
+    shape = "Year") +
+  theme(panel.grid = element_blank(), #remove panel lines
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        panel.background = element_rect(fill = "white",
+                                        colour = "black"))
+```
+

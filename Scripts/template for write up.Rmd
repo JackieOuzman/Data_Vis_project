@@ -1,0 +1,121 @@
+---
+title: "Taylors maturity sampling data visulaiation"
+output: github_document
+
+ 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+#*Add in table of contents when I work out how*
+
+* Set up Git
+
+* import data and make tidy
+
+* display data 
+
+
+# Setting up working environmnets.
+##Working directory and folders
+In my DATASCHOOL working directory, I created a new folders to organise my work.
+
+I have a folder for my raw data, scripts and figures.
+
+Using the drop down in R studio I have also created files, in which I will do my work.
+
+These files are:
+
+* Create a new project in R studio
+
+* Create a new script file in R
+
+* Create a new markdown file
+
+
+
+The advantage of creating a new project in R studio is that I am prompted to create a git repository
+
+##Creating a GIT repository.
+When I select create a new project in R studio, I go onto create a new directory and new project, here is a small checkbox 'create git repository'.
+Once this is selcted I can go to R studio Termial to double check that I have respository.
+
+
+In the terminal 
+$git status
+## Next step is to go to GitHub
+log in, and create a new repostitory.
+
+I selecetd public 
+
+Simply follow the instructions 
+
+'....or push on existing repository from command line'
+
+copy the code and paste in R studio terminal - done!
+
+This part is setting up a repsoitory on Github which allows my work to be pushed from my local computer to Github - Safe and sound!
+
+##Staging, commiting and pushing in R studio
+Again R studio makes things easy for me!
+
+Git pane has a list of my files.
+
+Checkbox allows me to stage the files and then commit.
+
+Adding a comment on the commit window.
+
+At the end of the day I can push my files to Github using the push icon in the git window.
+
+#Importing data.
+
+*Import tidyverse and ggplot2
+(note tidyverse already had ggplot2)
+
+*Import dplyer
+
+*Import my data using read_csv
+
+```{r import tidyverse}
+library(tidyverse)
+library(dplyr)
+
+maturity_data <- read_csv("Raw_data/Taylors_maturity_2015_2016.csv")
+```
+#Check out what my data looks like
+I have a few option here;
+
+*head()
+
+*str()
+
+*use the table from the environment panel 
+
+*glimps
+```{r look at data}
+str(maturity_data)
+head(maturity_data)
+```
+#Make my data tidy.
+I have a number of problem with my data that needs to be fixed:
+
+1.I have coloumn that need to be removed that have NA
+
+2.I have coloumn headings with white spaces
+
+3.I don't have a unquie ID coloumn
+
+4.My date coloumn is not represented at a date rather a string.
+  I should consider splitting this coloumn out to day, month, year
+
+5.Consider creating a new data coloumn that has year as factor.
+
+##Select data I want to use / remove the data I don't want.
+
+```{r delete the columns I dont want to use}
+
+```
+

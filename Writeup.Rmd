@@ -1,5 +1,5 @@
 ---
-title: "Write up"
+title: "Grape maturity data exploration"
 author: "Jackie"
 date: "7 August 2018"
 output: html_document
@@ -9,21 +9,18 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+#Add in table of contents when I work out how
 
 
-## Setting up my working environmnets.
+# Setting up my working environmnets.
+##Working directory and folders
 In my DATASCHOOL working directory, I created a new folders to organise my work.
 I have a folder for my raw data, scripts and figures.
 Using the drop down in R studio I have also created files, which I will do my work:
 These files are:
-1. Create a new project in R studio
-2. Create a new script file in R
-3. Create a new markdown file
+1.Create a new project in R studio
+2.Create a new script file in R
+3.Create a new markdown file
 
 The advantage of creating a new project in R studio is that I am prompted to create a git repository
 
@@ -53,12 +50,115 @@ Adding a comment on the commit window.
 
 At the end of the day I can push my files to Github using the push icon in the git window.
 
+##Getting ready for my data.
+Import tidyverse and ggplot2
+(note tidyverse already had ggplot2)
 
+import my data using read_csv
 
 ```{r}
 library(tidyverse)
-library(ggplot2)
+
 maturity_data <- read_csv("Raw_data/Taylors_maturity_2015_2016.csv")
 ```
 
+##Display my data as a summary in Rstudio
+```{r}
+head(maturity_data)
+```
+Or I can use
+
+```{r}
+str(maturity_data)
+
+nrow(maturity_data)
+ncol(maturity_data)
+```
+
+
+#I have empty columns of data that should be removed... how to do this is R?
+I can do it one at a time using 
+maturity_data$X30<- NULL
+
+Or I can remove all the empty coloumns using this function, creating a new data frame called maturity_data_clean.
+
+Check out if I have done it!
+```{r}
+
+maturity_data_clean <- maturity_data[,colSums(is.na(maturity_data))<nrow(maturity_data)]
+head(maturity_data_clean)
+```
+
+Can be done a better way use tidy drop  
+
+ 
+
+drop_na (maturity_data, X27)
+I can do one clm at a time - but what about multiple?
+drop_na () this won't work for me...I think this is just removing the NA from the rows
+
+
+maturity1 <- select(maturity, -starts_with("X"))
+```{r}
+#maturity1 <- select(maturity, -starts_with("X"))
+#head(maturity1)
+```
+
+
+
+ My heading names have gaps and R doesnt like this!
+ I need to change heading names
+ Again there is a better way to do this is tidyvesre... come back to this
+```{r}
+names(maturity_data_clean)[names(maturity_data_clean) == 'sampling event'] <- 'sampling_event'
+```
+I can go onto change all the others with spaces... better to set up file without space to start with.
+This works... to relpace white spaces with names..
+names(maturity2_a_rename)<-str_replace_all(names(maturity2_a_rename), c(" " = "." , "," = "" ))
+head(maturity2_a_rename)
+same as above but with _ not .
+names(maturity1)<-str_replace_all(names(maturity1), c(" " = "_" ))
+head(maturity1)
+
+##Split my date cloumn into day month year, but this will overwrite my Sampling_date clm
+```{r}
+#data1 <- maturity1 %>%
+  #separate(Sampling_date, c("Day", "Month", "Year"), sep = '/')
+#data1
+```
+
+##Change Year to factors
+```{r}
+#play_year$Year <- as.factor(play_year$Year)
+#head(play_year)
+```
+
+
+##Make may data tidy
+I need a unquie identify that is not repeated in the data clm
+```{r}
+
+```
+
+All is not lost beacuse I only really need year and I need to split out date and reformat it.
+
+This works in my R studio...Yes but it removes the data clms I want
+Need to make a copy of them first?
+maturity_data_clean <- maturity_data_clean %>%
+  unite(ID, Year, GPS_sampling_pt_ID)
+str(maturity_data_clean)
+
+```{r}
+
+```
+
+Ian method would be better
+maturity_data_clean %>%
+#  mutate(ID_1 = )
+
+ggplot(data = maturity_data_clean, aes(x = Sampling_date, y = pH))
+
+```{r}
+
+```
 
