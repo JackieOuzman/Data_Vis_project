@@ -421,3 +421,19 @@ mat_tidy4 %>%
         axis.text.y=element_blank(),
         panel.background = element_rect(fill = "white",
                                         colour = "black"))
+###Extra to add
+
+mat_tidy4 %>%
+  filter(GFV > "3000") %>%
+  ggplot(aes(x = POINT_X, y = POINT_Y, colour = brix, shape = Year_a)) +
+  geom_point(size = 1.5, alpha = 0.5) +
+  labs(                                      
+    x = "Easting",
+    y = "Northing",
+    title = "Late season sampling",
+    colour = "brix") +
+  theme(panel.grid = element_blank(), #remove panel lines
+        axis.text.x=element_text (),
+        axis.text.y=element_blank(),
+        panel.background = element_rect(fill = "white",
+                                        colour = "black"))
